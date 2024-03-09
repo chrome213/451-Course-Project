@@ -58,7 +58,7 @@ background-color: rgb(181, 206, 227);</string>
       <property name="title">
        <string>State / City</string>
       </property>
-      <widget class="QComboBox" name="comboBox">
+      <widget class="QComboBox" name="StateBox">
        <property name="geometry">
         <rect>
          <x>90</x>
@@ -98,7 +98,7 @@ font: 10pt &quot;Lucida Sans&quot;;</string>
         <string>City</string>
        </property>
       </widget>
-      <widget class="QListWidget" name="listWidget">
+      <widget class="QListWidget" name="CityList">
        <property name="geometry">
         <rect>
          <x>90</x>
