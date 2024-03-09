@@ -16,10 +16,10 @@ class myApp(QMainWindow):  # Class for the main window
         super(myApp, self).__init__()
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
-        self.connectToDB()
-        self.loadStates()
-        self.ui.StateBox.currentIndexChanged.connect(self.loadCities)  
-        self.ui.CityList.itemClicked.connect(self.loadBusinessesForCity)  
+        self.connectToDB() # Connect to the database
+        self.loadStates() # Load states
+        self.ui.StateBox.currentIndexChanged.connect(self.loadCities) # Load cities for the selected state
+        self.ui.CityList.itemClicked.connect(self.loadBusinessesForCity)  # Load businesses for the selected city 
 
     def connectToDB(self): # Function to connect to the database
         try:
