@@ -4,6 +4,7 @@ CREATE TABLE zipcode (
   population INT NOT NULL
 );
 
+-- merges the Is in A relation with Business
 CREATE TABLE Business (
     business_id INT PRIMARY KEY,
     name VARCHAR(255),
@@ -18,6 +19,7 @@ CREATE TABLE Business (
     FOREIGN KEY (zipcode) REFERENCES Zipcode(zipcode_id)
 );
 
+-- merged the Is Given relation with Reviews
 CREATE TABLE Review (
     review_id INT PRIMARY KEY,
     stars DECIMAL,
@@ -29,7 +31,7 @@ CREATE TABLE Categories (
     name VARCHAR(255) PRIMARY KEY
 );
 
-CREATE TABLE Given (
+CREATE TABLE Has (
     business_id INT,
     category_id INT,
     PRIMARY KEY (business_id, name),
@@ -37,6 +39,7 @@ CREATE TABLE Given (
     FOREIGN KEY (name) REFERENCES Categories(name)
 );
 
+-- merged the Gets relation with Checkins
 CREATE TABLE Check_ins (
     business_id INT,
     day DATE,
