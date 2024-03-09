@@ -18,7 +18,7 @@ class myApp(QMainWindow):  # Inherit from DatabaseClass
         self.connectToDB()
         self.loadStates()
         self.ui.StateBox.currentIndexChanged.connect(self.loadCities)  # Connect state change signal
-        self.ui.CityList.currentItemChanged.connect(self.loadBusinesses)
+        self.ui.CityList.itemClicked.connect(self.loadBusinessesForCity)  # Connect city change signal
 
     def connectToDB(self):
         try:
@@ -51,29 +51,22 @@ class myApp(QMainWindow):  # Inherit from DatabaseClass
         except psycopg2.Error as e:
             print(f'Failed to fetch cities. Error: {e}')
 
-    def loadBusinesses(self):
-        selected_city = self.ui.CityList.currentItem().text() if self.ui.CityList.currentItem() else None
-        if not selected_city:  # Check if a city is selected
-            return
-        self.ui.BusinessTable.setColumnCount(3)  # set column count
-        self.ui.BusinessTable.setRowCount(0)  # Clear existing rows
-        self.BusinessTable.setHorizontalHeaderLabels(['Name', 'City', 'State'])  # Set column headers
+    def loadBusinessesForCity(self):
+        selected_city = self.ui.CityList.currentItem().text()  # Get the selected city
+        self.ui.BusinessTable.clearContents()  # Clear existing contents
+        self.ui.BusinessTable.setColumnCount(3)  # Set column count
+        self.ui.BusinessTable.setHorizontalHeaderLabels(['Name', 'State', 'City'])  # Set column headers
+        
         try:
-        # Use placeholders %s for parameterized queries
-            query = "SELECT name, city, state FROM business WHERE city=%s AND state=%s ORDER BY name;"
-            self.cur.execute(query, selected_city)
+            self.cur.execute("SELECT name, state, city FROM business WHERE city=%s ORDER BY name;", (selected_city,))
             businesses = self.cur.fetchall()
-            
-            for business in businesses:
-                row_position = self.ui.BusinessTable.rowCount()
-                self.ui.BusinessTable.insertRow(row_position)  # Insert a new row
-                
-                # Add data to the row for each business
-                for column, item in enumerate(business):
-                    self.ui.BusinessTable.setItem(row_position, column, QTableWidgetItem(str(item)))
-                    
+            self.ui.BusinessTable.setRowCount(len(businesses))  # Set row count
+            for row, (name, state, city) in enumerate(businesses):
+                self.ui.BusinessTable.setItem(row, 0, QTableWidgetItem(name))
+                self.ui.BusinessTable.setItem(row, 1, QTableWidgetItem(state))
+                self.ui.BusinessTable.setItem(row, 2, QTableWidgetItem(city))
         except psycopg2.Error as e:
-            print(f'Failed to fetch businesses. Error: {e}')
+            print(f'Failed to fetch businesses for city {selected_city}. Error: {e}')    
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
