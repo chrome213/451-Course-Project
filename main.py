@@ -61,7 +61,7 @@ class myApp(QMainWindow):  # Inherit from DatabaseClass
         try:
         # Use placeholders %s for parameterized queries
             query = "SELECT name, city, state FROM business WHERE city=%s AND state=%s ORDER BY name;"
-            self.cur.execute(query, (selected_city, selected_state))
+            self.cur.execute(query, selected_city)
             businesses = self.cur.fetchall()
             
             for business in businesses:
