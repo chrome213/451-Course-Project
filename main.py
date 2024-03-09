@@ -2,34 +2,35 @@ import sys
 from PyQt6.QtWidgets import QMainWindow, QApplication, QWidget, QTableWidget,QTableWidgetItem,QVBoxLayout
 from PyQt6 import uic, QtCore
 from PyQt6.QtGui import QIcon, QPixmap
+from PyQt6.QtWidgets import QHeaderView
 import psycopg2
 from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
 
 
-qtCreatorFile = "milestone1App.ui" # Enter file here.
+qtCreatorFile = "milestone1App.ui" 
 
 Ui_MainWindow, QtBaseClass = uic.loadUiType(qtCreatorFile)
 
-class myApp(QMainWindow):  # Inherit from DatabaseClass
+class myApp(QMainWindow):  # Class for the main window
     def __init__(self):
         super(myApp, self).__init__()
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
         self.connectToDB()
         self.loadStates()
-        self.ui.StateBox.currentIndexChanged.connect(self.loadCities)  # Connect state change signal
-        self.ui.CityList.itemClicked.connect(self.loadBusinessesForCity)  # Connect city change signal
+        self.ui.StateBox.currentIndexChanged.connect(self.loadCities)  
+        self.ui.CityList.itemClicked.connect(self.loadBusinessesForCity)  
 
-    def connectToDB(self):
+    def connectToDB(self): # Function to connect to the database
         try:
-            self.conn = psycopg2.connect("dbname='milestone1db' user='postgres' host='localhost' password='0213'")
+            self.conn = psycopg2.connect("dbname='milestone1db' user='postgres' host='localhost' password='0213'") # Connect to the database
             self.conn.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
             self.cur = self.conn.cursor()
         except psycopg2.Error as e:
             print(f'Unable to connect to the database! Error: {e}')
             sys.exit(1)
 
-    def loadStates(self):
+    def loadStates(self): # Function to load states
         self.connectToDB()
         try:
             self.cur.execute("SELECT DISTINCT state FROM business ORDER BY state;")
@@ -39,25 +40,27 @@ class myApp(QMainWindow):  # Inherit from DatabaseClass
         except psycopg2.Error as e:
             print(f'Failed to fetch states. Error: {e}')
 
-    def loadCities(self):
-        selected_state = self.ui.StateBox.currentText()  # Make sure you access StateBox correctly
-        self.ui.CityList.clear()  # Clear existing items
+    def loadCities(self): # Function to load cities for the selected state
+        selected_state = self.ui.StateBox.currentText()   
+        self.ui.CityList.clear()  
         try:
-            self.cur.execute("SELECT DISTINCT city FROM business WHERE state=%s ORDER BY city;", (selected_state,))
+            self.cur.execute("SELECT DISTINCT city FROM business WHERE state=%s ORDER BY city;", (selected_state,))   # Fetch cities for the selected state
             cities = self.cur.fetchall()
             for city in cities:
-                # Create a QListWidgetItem for each city and add it to the CityList
-                self.ui.CityList.addItem(city[0])  # This should work as expected for QListWidget
+                self.ui.CityList.addItem(city[0])  
         except psycopg2.Error as e:
             print(f'Failed to fetch cities. Error: {e}')
 
-    def loadBusinessesForCity(self):
-        selected_city = self.ui.CityList.currentItem().text()  # Get the selected city
-        self.ui.BusinessTable.clearContents()  # Clear existing contents
-        self.ui.BusinessTable.setColumnCount(3)  # Set column count
-        self.ui.BusinessTable.setHorizontalHeaderLabels(['Name', 'State', 'City'])  # Set column headers
+    def loadBusinessesForCity(self): # Function to load businesses for the selected city
+        selected_city = self.ui.CityList.currentItem().text() # Get the selected city
+        self.ui.BusinessTable.clearContents()  
+        self.ui.BusinessTable.setColumnCount(3)  
+        self.ui.BusinessTable.verticalHeader().setVisible(False)  
+        self.ui.BusinessTable.setHorizontalHeaderLabels(['Name', 'State', 'City'])  
+        header = self.ui.BusinessTable.horizontalHeader()
+        header.setSectionResizeMode(0, QHeaderView.ResizeMode.Stretch)
         
-        try:
+        try: # Fetch businesses for the selected city
             self.cur.execute("SELECT name, state, city FROM business WHERE city=%s ORDER BY name;", (selected_city,))
             businesses = self.cur.fetchall()
             self.ui.BusinessTable.setRowCount(len(businesses))  # Set row count
