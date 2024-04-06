@@ -119,6 +119,86 @@ def insert2ReviewTable():
     print(count_line)
     f.close()
 
+# funciton (insert2categoriesTable) to insert data into the categories table
+# example of categories dictionary entry: "categories": ["Chicken Wings", "Sandwiches", "Restaurants", "Pizza"]
+# CREATE TABLE Categories (
+#     name VARCHAR(255) PRIMARY KEY
+# );
+# make the table and populate it with unique categories from the yelp_business.JSON file
+def insert2CategoriesTable():
+    with open('./yelp_business.JSON','r') as f:
+        line = f.readline()
+        count_line = 0
+
+        try:
+            conn = psycopg2.connect("dbname='milestone2db' user='postgres' host='localhost' password='0213'")
+        except:
+            print('Unable to connect to the database!')
+            return
+        cur = conn.cursor()
+        cur.execute("DROP TABLE IF EXISTS Categories CASCADE")
+        cur.execute("CREATE TABLE Categories (name VARCHAR(255) PRIMARY KEY);")
+        conn.commit()
+        while line:
+            data = json.loads(line)
+            categories = data["categories"]
+            for category in categories:
+                sql_str = "INSERT INTO Categories (name) VALUES (%s) ON CONFLICT (name) DO NOTHING;"
+                cur.execute(sql_str, (cleanStr4SQL(category),))
+                conn.commit()
+
+            line = f.readline()
+            count_line +=1
+
+        cur.close()
+        conn.close()
+
+    print(count_line)
+    f.close()
+
+# function (insert2HasTable) to insert data into the has table
+# CREATE TABLE Has (
+#     business_id VARCHAR(255),
+#     category_id VARCHAR(255),
+#     PRIMARY KEY (business_id, name),
+#     FOREIGN KEY (business_id) REFERENCES Business(business_id),
+#     FOREIGN KEY (name) REFERENCES Categories(name)
+# );
+# make the table and populate it using the business and categories tables
+def insert2HasTable():
+    with open('./yelp_business.JSON','r') as f:
+        line = f.readline()
+        count_line = 0
+
+        try:
+            conn = psycopg2.connect("dbname='milestone2db' user='postgres' host='localhost' password='0213'")
+        except:
+            print('Unable to connect to the database!')
+            return
+        cur = conn.cursor()
+        cur.execute("DROP TABLE IF EXISTS Has CASCADE")
+        cur.execute("CREATE TABLE Has (business_id VARCHAR(255), category_id VARCHAR(255), PRIMARY KEY (business_id, category_id), FOREIGN KEY (business_id) REFERENCES Business(business_id), FOREIGN KEY (category_id) REFERENCES Categories(name));")
+        conn.commit()
+        while line:
+            data = json.loads(line)
+            categories = data["categories"]
+            for category in categories:
+                sql_str = "INSERT INTO Has (business_id, category_id) VALUES (%s, %s) ON CONFLICT (business_id, category_id) DO NOTHING;"
+                cur.execute(sql_str, (cleanStr4SQL(data["business_id"]), cleanStr4SQL(category)))
+                conn.commit()
+
+            line = f.readline()
+            count_line +=1
+
+        cur.close()
+        conn.close()
+
+    print(count_line)
+    f.close()
+
+
 # insert2ZipcodeDataTable()
 # insert2BusinessTable()
 # insert2ReviewTable()
+#insert2CategoriesTable()
+insert2HasTable()
