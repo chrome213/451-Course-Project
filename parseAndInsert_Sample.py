@@ -196,9 +196,50 @@ def insert2HasTable():
     print(count_line)
     f.close()
 
+# Function (insert2CheckinTable) to insert data into the checkin table
+# CREATE TABLE Check_ins (
+#     business_id VARCHAR(255),
+#     day VARCHAR(10),
+#     count INT,
+#     PRIMARY KEY (business_id, day),
+#     FOREIGN KEY (business_id) REFERENCES Business(business_id)
+# );
+# example data in the json: {"time": {"Friday": {"20:00": 2, "19:00": 1, "22:00": 10, "21:00": 5, "23:00": 14, "0:00": 2, "18:00": 2}, "Thursday": {"23:00": 1, "0:00": 1, "19:00": 1, "18:00": 1, "16:00": 2, "22:00": 2}, "Wednesday": {"17:00": 2, "23:00": 3, "16:00": 1, "22:00": 1, "19:00": 1, "21:00": 1}, "Sunday": {"16:00": 2, "17:00": 2, "19:00": 1, "22:00": 4, "21:00": 4, "0:00": 3, "1:00": 2}, "Saturday": {"21:00": 4, "20:00": 3, "23:00": 10, "22:00": 7, "18:00": 1, "15:00": 2, "16:00": 1, "17:00": 1, "0:00": 8, "1:00": 1}, "Tuesday": {"19:00": 1, "17:00": 1, "1:00": 2, "21:00": 1, "23:00": 3}, "Monday": {"18:00": 2, "23:00": 1, "22:00": 2}}, "business_id": "dwQEZBFen2GdihLLfWeexA"}
+def insert2CheckinTable():
+    with open('./yelp_checkin.JSON','r') as f:
+        line = f.readline()
+        count_line = 0
 
-insert2ZipcodeDataTable()
-insert2BusinessTable()
+        try:
+            conn = psycopg2.connect("dbname='milestone2db' user='postgres' host='localhost' password='0213'")
+        except:
+            print('Unable to connect to the database!')
+            return
+        cur = conn.cursor()
+        cur.execute("DROP TABLE IF EXISTS Check_ins CASCADE")
+        cur.execute("CREATE TABLE Check_ins (business_id VARCHAR(255), day VARCHAR(10), count INT, PRIMARY KEY (business_id, day), FOREIGN KEY (business_id) REFERENCES Business(business_id));")
+        conn.commit()
+        while line:
+            data = json.loads(line)
+            checkins = data["time"]
+            for day in checkins.items():
+                sql_str = "INSERT INTO Check_ins (business_id, day, count) VALUES (%s, %s, %s) ON CONFLICT (business_id, day) DO NOTHING;"
+                cur.execute(sql_str, (cleanStr4SQL(data["business_id"]), day[0], len(day[1])))
+                conn.commit()
+
+            line = f.readline()
+            count_line +=1
+
+        cur.close()
+        conn.close()
+
+    print(count_line)
+    f.close()
+
+
+#insert2ZipcodeDataTable()
+#insert2BusinessTable()
 insert2ReviewTable()
-insert2CategoriesTable()
-insert2HasTable()
+#insert2CategoriesTable()
+#insert2HasTable()
+#insert2CheckinTable()
