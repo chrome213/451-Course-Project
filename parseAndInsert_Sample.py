@@ -35,7 +35,7 @@ def insert2BusinessTable():
             
             sql_str =  "INSERT INTO Business (business_id, name, city, zipcode, address, review_count, state, reviewRating, numCheckins, stars) " \
                           "VALUES ('" + cleanStr4SQL(data['business_id']) + "','" + cleanStr4SQL(data["name"]) + "','" + cleanStr4SQL(data["city"]) + "','" + \
-                            cleanStr4SQL(data["postal_code"]) + "','" + cleanStr4SQL(data["address"]) + "'," + str(data["review_count"]) + ",'" + cleanStr4SQL(data["state"]) + "'," + \
+                            cleanStr4SQL(data["postal_code"]) + "','" + cleanStr4SQL(data["address"]) + "'," + "0" + ",'" + cleanStr4SQL(data["state"]) + "'," + \
                             "0.0" + ",0 ," + str(data["stars"]) + ");"
             
             try:
@@ -236,10 +236,51 @@ def insert2CheckinTable():
     print(count_line)
     f.close()
 
+# Function (UpdateCheckins) to update the numCheckins column in the Business table using the Check_ins table
+def UpdateCheckins():
+    try:
+        conn = psycopg2.connect("dbname='milestone2db' user='postgres' host='localhost' password='0213'")
+    except:
+        print('Unable to connect to the database!')
+        return
+    cur = conn.cursor()
+    cur.execute("UPDATE Business SET numCheckins = (SELECT SUM(count) FROM Check_ins WHERE Check_ins.business_id = Business.business_id);")
+    conn.commit()
+    cur.close()
+    conn.close()
+
+# Function (update reviewCount) to update the review_count column in the Business table using the Review table
+def updateReviewCount():
+    try:
+        conn = psycopg2.connect("dbname='milestone2db' user='postgres' host='localhost' password='0213'")
+    except:
+        print('Unable to connect to the database!')
+        return
+    cur = conn.cursor()
+    cur.execute("UPDATE Business SET review_count = (SELECT COUNT(*) FROM Review WHERE Review.business_id = Business.business_id);")
+    conn.commit()
+    cur.close()
+    conn.close()
+
+# Function (update reviewRating) to update the reviewRating column in the Business table using the Review table to calculate average stars for each business
+def updateReviewRating():
+    try:
+        conn = psycopg2.connect("dbname='milestone2db' user='postgres' host='localhost' password='0213'")
+    except:
+        print('Unable to connect to the database!')
+        return
+    cur = conn.cursor()
+    cur.execute("UPDATE Business SET reviewRating = (SELECT AVG(stars) FROM Review WHERE Review.business_id = Business.business_id);")
+    conn.commit()
+    cur.close()
+    conn.close()
 
 #insert2ZipcodeDataTable()
-#insert2BusinessTable()
-insert2ReviewTable()
+insert2BusinessTable()
+#insert2ReviewTable()
 #insert2CategoriesTable()
 #insert2HasTable()
 #insert2CheckinTable()
+UpdateCheckins()
+updateReviewCount()
+updateReviewRating()

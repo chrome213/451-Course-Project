@@ -240,6 +240,10 @@ class myApp(QMainWindow):  # Class for the main window
         self.cur.close()
         self.conn.close()
 
+
+
+
+
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     window = myApp()
