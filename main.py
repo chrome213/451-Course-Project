@@ -27,6 +27,8 @@ class myApp(QMainWindow):  # Class for the main window
         self.ui.State.currentIndexChanged.connect(self.m2LoadCities) # Load cities for the selected state using the selectLocation table
         self.ui.City.itemClicked.connect(self.m2LoadZipcode)
         self.ui.Zipcode.itemClicked.connect(self.m2ZipcodeStatistics)
+        self.ui.Search.clicked.connect(self.m2Filter)
+        self.ui.SelectCategory.itemClicked.connect(self.m2Businesses)
 
     def connectToDB(self, dbName): # dbName is the name of the database to connect to
         try:
@@ -165,16 +167,78 @@ class myApp(QMainWindow):  # Class for the main window
             header = self.ui.TopCategories.horizontalHeader()
             header.setSectionResizeMode(1, QHeaderView.ResizeMode.Stretch)
 
-
-
         except psycopg2.Error as e:
             print(f'Failed to fetch statistics. Error: {e}')
 
         self.cur.close()
         self.conn.close()
 
+# function (m2Filter) that populates the SelectCategory QListWidget with unique categories from the businesses in the selected zipcode using the Has table
+    def m2Filter(self):
+        self.connectToDB("milestone2db")
+        selected_zipcode = self.ui.Zipcode.currentItem().text()
+        self.ui.SelectCategory.clear()
+        try:
+            self.cur.execute("""
+                SELECT DISTINCT c.name
+                FROM Business AS b
+                JOIN Has AS h ON b.business_id = h.business_id
+                JOIN Categories AS c ON h.category_id = c.name
+                WHERE b.zipcode = %s
+                ORDER BY c.name;
+            """, (selected_zipcode,))
+            categories = self.cur.fetchall()
+            for category in categories:
+                self.ui.SelectCategory.addItem(str(category[0]))
+        except psycopg2.Error as e:
+            print(f'Failed to fetch categories. Error: {e}')    
 
+        self.cur.close()
 
+# function (m2Businesses) that populates the Businesses QTablewidget with businesses in the selected zipcode and selected category with (business name, address, city, stars, review count, average rating, number of checkins) using the Business table
+    def m2Businesses(self):
+        self.connectToDB("milestone2db")
+        selected_zipcode = self.ui.Zipcode.currentItem().text()
+        selected_category = self.ui.SelectCategory.currentItem().text()
+        self.ui.Businesses.clearContents()
+        self.ui.Businesses.setColumnCount(7)
+        self.ui.Businesses.setHorizontalHeaderLabels(['Name', 'Address', 'City', 'Stars', 'RevCount', 'reviewRating', 'numCheckins'])
+        header = self.ui.Businesses.horizontalHeader()
+        header.setSectionResizeMode(0, QHeaderView.ResizeMode.Stretch)
+
+        try:
+            self.cur.execute("""
+                SELECT b.name, b.address, b.city, b.stars, b.review_count, b.reviewRating, b.numCheckins
+                FROM Business AS b
+                JOIN Has AS h ON b.business_id = h.business_id
+                JOIN Categories AS c ON h.category_id = c.name
+                WHERE b.zipcode = %s AND c.name = %s
+                ORDER BY b.name;
+            """, (selected_zipcode, selected_category))
+            businesses = self.cur.fetchall()
+            self.ui.Businesses.setRowCount(len(businesses))
+            for row, (name, address, city, stars, review_count, reviewRating, numCheckins) in enumerate(businesses):
+                self.ui.Businesses.setItem(row, 0, QTableWidgetItem(name))
+                self.ui.Businesses.setItem(row, 1, QTableWidgetItem(address))
+                self.ui.Businesses.setItem(row, 2, QTableWidgetItem(city))
+                self.ui.Businesses.setItem(row, 3, QTableWidgetItem(str(stars)))
+                self.ui.Businesses.setItem(row, 4, QTableWidgetItem(str(review_count)))
+                self.ui.Businesses.setItem(row, 5, QTableWidgetItem(str(reviewRating)))
+                self.ui.Businesses.setItem(row, 6, QTableWidgetItem(str(numCheckins)))
+        except psycopg2.Error as e:
+            print(f'Failed to fetch businesses. Error: {e}')
+        # make the last 4 columns smaller and  increase the first column size
+        header = self.ui.Businesses.horizontalHeader()
+        header.setSectionResizeMode(0, QHeaderView.ResizeMode.ResizeToContents)
+        header.setSectionResizeMode(1, QHeaderView.ResizeMode.ResizeToContents)
+        header.setSectionResizeMode(2, QHeaderView.ResizeMode.ResizeToContents)
+        header.setSectionResizeMode(3, QHeaderView.ResizeMode.ResizeToContents)
+        header.setSectionResizeMode(4, QHeaderView.ResizeMode.ResizeToContents)
+        header.setSectionResizeMode(5, QHeaderView.ResizeMode.ResizeToContents)
+        header.setSectionResizeMode(6, QHeaderView.ResizeMode.ResizeToContents)
+        
+        self.cur.close()
+        self.conn.close()
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

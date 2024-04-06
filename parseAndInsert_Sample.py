@@ -28,15 +28,15 @@ def insert2BusinessTable():
             return
         cur = conn.cursor()
         cur.execute("DROP TABLE IF EXISTS Business CASCADE")
-        cur.execute("CREATE TABLE Business (business_id VARCHAR(255) PRIMARY KEY, name VARCHAR(255), city VARCHAR(255), zipcode INT, address VARCHAR(255), review_count INT, state VARCHAR(255), average_rating DECIMAL, total_checkins INT, stars DECIMAL, FOREIGN KEY (zipcode) REFERENCES Zipcode(zipcode_id));")
+        cur.execute("CREATE TABLE Business (business_id VARCHAR(255) PRIMARY KEY, name VARCHAR(255), city VARCHAR(255), zipcode INT, address VARCHAR(255), review_count INT, state VARCHAR(255), reviewRating DECIMAL, numCheckins INT, stars DECIMAL, FOREIGN KEY (zipcode) REFERENCES Zipcode(zipcode_id));")
         conn.commit()
         while line:
             data = json.loads(line)
             
-            sql_str =  "INSERT INTO Business (business_id, name, city, zipcode, address, review_count, state, average_rating, total_checkins, stars) " \
+            sql_str =  "INSERT INTO Business (business_id, name, city, zipcode, address, review_count, state, reviewRating, numCheckins, stars) " \
                           "VALUES ('" + cleanStr4SQL(data['business_id']) + "','" + cleanStr4SQL(data["name"]) + "','" + cleanStr4SQL(data["city"]) + "','" + \
                             cleanStr4SQL(data["postal_code"]) + "','" + cleanStr4SQL(data["address"]) + "'," + str(data["review_count"]) + ",'" + cleanStr4SQL(data["state"]) + "'," + \
-                            str(data["stars"]) + ",0 ," + str(data["stars"]) + ");"
+                            "0.0" + ",0 ," + str(data["stars"]) + ");"
             
             try:
                 cur.execute(sql_str)
@@ -197,8 +197,8 @@ def insert2HasTable():
     f.close()
 
 
-# insert2ZipcodeDataTable()
-# insert2BusinessTable()
-# insert2ReviewTable()
-#insert2CategoriesTable()
+insert2ZipcodeDataTable()
+insert2BusinessTable()
+insert2ReviewTable()
+insert2CategoriesTable()
 insert2HasTable()
