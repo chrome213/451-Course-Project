@@ -43,7 +43,7 @@ class myApp(QMainWindow):  # Class for the main window
             self.cur.execute("SELECT DISTINCT state FROM business ORDER BY state;")
             states = self.cur.fetchall()
             for state in states:
-                self.ui.StateBox.addItem(state[0])
+                self.ui.StateBox.addItem(str(state[0]))
         except psycopg2.Error as e:
             print(f'Failed to fetch states. Error: {e}')
 
@@ -55,7 +55,7 @@ class myApp(QMainWindow):  # Class for the main window
             self.cur.execute("SELECT DISTINCT city FROM business WHERE state=%s ORDER BY city;", (selected_state,))   # Fetch cities for the selected state
             cities = self.cur.fetchall()
             for city in cities:
-                self.ui.CityList.addItem(city[0])  
+                self.ui.CityList.addItem(str(city[0]))
         except psycopg2.Error as e:
             print(f'Failed to fetch cities. Error: {e}')
 
@@ -83,10 +83,10 @@ class myApp(QMainWindow):  # Class for the main window
     def m2loadStates(self): # Function to load states
         self.connectToDB("milestone2db")
         try:
-            self.cur.execute("SELECT DISTINCT state FROM businessTable ORDER BY state;")
+            self.cur.execute("SELECT DISTINCT state FROM business ORDER BY state;")
             states = self.cur.fetchall()
             for state in states:
-                self.ui.State.addItem(state[0])
+                self.ui.State.addItem(str(state[0]))
         except psycopg2.Error as e:
             print(f'Failed to fetch states. Error: {e}')
    
@@ -96,10 +96,10 @@ class myApp(QMainWindow):  # Class for the main window
         selected_state = self.ui.State.currentText()   
         self.ui.City.clear()  
         try:
-            self.cur.execute("SELECT DISTINCT city FROM businessTable WHERE state=%s ORDER BY city;", (selected_state,))   # Fetch cities for the selected state
+            self.cur.execute("SELECT DISTINCT city FROM business WHERE state=%s ORDER BY city;", (selected_state,))   # Fetch cities for the selected state
             cities = self.cur.fetchall()
             for city in cities:
-                self.ui.City.addItem(city[0])  
+                self.ui.City.addItem(str(city[0]))
         except psycopg2.Error as e:
             print(f'Failed to fetch cities. Error: {e}') 
 
@@ -109,27 +109,47 @@ class myApp(QMainWindow):  # Class for the main window
         selected_city = self.ui.City.currentItem().text() # Get the selected city
         self.ui.Zipcode.clear()  
         try:
-            self.cur.execute("SELECT DISTINCT zipcode FROM businessTable WHERE city=%s ORDER BY zipcode;", (selected_city,))   # Fetch zipcodes for the selected city
+            self.cur.execute("SELECT DISTINCT zipcode FROM business WHERE city=%s ORDER BY zipcode;", (selected_city,))   # Fetch zipcodes for the selected city
             zipcodes = self.cur.fetchall()
             for zipcode in zipcodes:
-                self.ui.Zipcode.addItem(zipcode[0])  
+                self.ui.Zipcode.addItem(str(zipcode[0]))
         except psycopg2.Error as e:
             print(f'Failed to fetch zipcodes. Error: {e}')
 
     def m2ZipcodeStatistics(self):
         self.connectToDB("milestone2db")
-        selected_zipcode = self.ui.Zipcode.currentItem().text() # Get the selected zipcode
-        # BusinessesStatistic, PopulationStatistic, IncomeStatistic are QLabels. populate them using the ZipcodeStatistics table
-        try:
-            # fetch numbusinesses, totalpupulation, and avgincome from zipcodeStatistics table for the selected zipcode and populate the QLabels
-            self.cur.execute("SELECT numbusinesses, totalpopulation, avgincome FROM zipcodeStatistics WHERE zipcode=%s;", (selected_zipcode,))
-            statistics = self.cur.fetchone()
-            self.ui.BusinessesStatistic.setText(str(statistics[0]))
-            self.ui.PopulationStatistic.setText(str(statistics[1]))
-            self.ui.IncomeStatistic.setText(str(statistics[2]))
+        selected_zipcode = self.ui.Zipcode.currentItem().text()  # Get the selected zipcode
 
-            # fetch unique categories from businessTable for the selected zipcode and populate the TopCategories QTableWidget
-            self.cur.execute("SELECT DISTINCT category FROM businessTable WHERE zipcode=%s;", (selected_zipcode,))
+        try:
+            # Calculate the number of businesses in the selected zipcode
+            self.cur.execute("""
+                SELECT COUNT(*)
+                FROM Business
+                WHERE zipcode = %s;
+            """, (selected_zipcode,))
+            num_businesses = self.cur.fetchone()[0]
+
+            # Fetch population and mean income from the Zipcode table for the selected zipcode
+            self.cur.execute("""
+                SELECT population, meanincome
+                FROM Zipcode
+                WHERE zipcode_id = %s;
+            """, (selected_zipcode,))
+            statistics = self.cur.fetchone()
+            population, mean_income = statistics if statistics else (0, 0)
+
+            self.ui.BusinessesStatistic.setText(str(num_businesses))
+            self.ui.PopulationStatistic.setText(str(population))
+            self.ui.IncomeStatistic.setText(str(mean_income))
+
+            # Fetch unique categories from the Categories table through the Has relationship for the selected zipcode
+            self.cur.execute("""
+                SELECT DISTINCT C.name
+                FROM Categories C
+                JOIN Has H ON C.name = H.category_id
+                JOIN Business B ON H.business_id = B.business_id
+                WHERE B.zipcode = %s;
+            """, (selected_zipcode,))
             categories = self.cur.fetchall()
             self.ui.TopCategories.clearContents()
             self.ui.TopCategories.setColumnCount(1)
@@ -138,9 +158,10 @@ class myApp(QMainWindow):  # Class for the main window
             for row, (category,) in enumerate(categories):
                 self.ui.TopCategories.setItem(row, 0, QTableWidgetItem(category))
 
-
         except psycopg2.Error as e:
             print(f'Failed to fetch statistics for zipcode {selected_zipcode}. Error: {e}')
+
+
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
