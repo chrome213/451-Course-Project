@@ -7,7 +7,7 @@ import psycopg2
 from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
 
 
-qtCreatorFile = "milestone1App.ui" 
+qtCreatorFile = "milestone2App.ui" 
 
 Ui_MainWindow, QtBaseClass = uic.loadUiType(qtCreatorFile)
 
