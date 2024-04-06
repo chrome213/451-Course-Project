@@ -416,7 +416,7 @@ font: 10pt &quot;Lucida Sans&quot;;</string>
        </rect>
       </property>
       <property name="text">
-       <string># of Buisinesses:</string>
+       <string># of Businesses:</string>
       </property>
      </widget>
      <widget class="QTableWidget" name="Successful">
@@ -605,7 +605,7 @@ font: 10pt &quot;Lucida Sans&quot;;</string>
        <string>Business Page:</string>
       </property>
      </widget>
-     <widget class="QLabel" name="BuisinessesStatistic">
+     <widget class="QLabel" name="BusinessesStatistic">
       <property name="geometry">
        <rect>
         <x>610</x>
@@ -727,7 +727,7 @@ font: 10pt &quot;Lucida Sans&quot;;</string>
      <zorder>label_6</zorder>
      <zorder>Popular</zorder>
      <zorder>label_11</zorder>
-     <zorder>BuisinessesStatistic</zorder>
+     <zorder>BusinessesStatistic</zorder>
      <zorder>label_18</zorder>
      <zorder>TopCategories</zorder>
      <zorder>label_14</zorder>

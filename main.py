@@ -16,22 +16,29 @@ class myApp(QMainWindow):  # Class for the main window
         super(myApp, self).__init__()
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
-        self.connectToDB() # Connect to the database
+
+        # MILSTONE 1
         self.loadStates() # Load states
         self.ui.StateBox.currentIndexChanged.connect(self.loadCities) # Load cities for the selected state
         self.ui.CityList.itemClicked.connect(self.loadBusinessesForCity)  # Load businesses for the selected city 
+        
+        # MILSTONE 2
+        self.m2loadStates()
+        self.ui.State.currentIndexChanged.connect(self.m2LoadCities) # Load cities for the selected state using the selectLocation table
+        self.ui.City.itemClicked.connect(self.m2LoadZipcode)
+        self.ui.Zipcode.itemClicked.connect(self.m2ZipcodeStatistics)
 
-    def connectToDB(self): # Function to connect to the database
+    def connectToDB(self, dbName): # dbName is the name of the database to connect to
         try:
-            self.conn = psycopg2.connect("dbname='milestone1db' user='postgres' host='localhost' password='0213'") # Connect to the database
+            self.conn = psycopg2.connect(f"dbname='{dbName}' user='postgres' host='localhost' password='0213'")
             self.conn.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
             self.cur = self.conn.cursor()
         except psycopg2.Error as e:
-            print(f'Unable to connect to the database! Error: {e}')
+            print(f'Unable to connect to the {dbName} database! Error: {e}')
             sys.exit(1)
 
     def loadStates(self): # Function to load states
-        self.connectToDB()
+        self.connectToDB("milestone1db")
         try:
             self.cur.execute("SELECT DISTINCT state FROM business ORDER BY state;")
             states = self.cur.fetchall()
@@ -41,6 +48,7 @@ class myApp(QMainWindow):  # Class for the main window
             print(f'Failed to fetch states. Error: {e}')
 
     def loadCities(self): # Function to load cities for the selected state
+        self.connectToDB("milestone1db")
         selected_state = self.ui.StateBox.currentText()   
         self.ui.CityList.clear()  
         try:
@@ -52,6 +60,7 @@ class myApp(QMainWindow):  # Class for the main window
             print(f'Failed to fetch cities. Error: {e}')
 
     def loadBusinessesForCity(self): # Function to load businesses for the selected city
+        self.connectToDB("milestone1db")
         selected_city = self.ui.CityList.currentItem().text() # Get the selected city
         self.ui.BusinessTable.clearContents()  
         self.ui.BusinessTable.setColumnCount(3)  
@@ -70,6 +79,68 @@ class myApp(QMainWindow):  # Class for the main window
                 self.ui.BusinessTable.setItem(row, 2, QTableWidgetItem(city))
         except psycopg2.Error as e:
             print(f'Failed to fetch businesses for city {selected_city}. Error: {e}')    
+
+    def m2loadStates(self): # Function to load states
+        self.connectToDB("milestone2db")
+        try:
+            self.cur.execute("SELECT DISTINCT state FROM businessTable ORDER BY state;")
+            states = self.cur.fetchall()
+            for state in states:
+                self.ui.State.addItem(state[0])
+        except psycopg2.Error as e:
+            print(f'Failed to fetch states. Error: {e}')
+   
+    # function (m2LoadCities) to load cities from the selected state using the selectLocation table
+    def m2LoadCities(self):
+        self.connectToDB("milestone2db")
+        selected_state = self.ui.State.currentText()   
+        self.ui.City.clear()  
+        try:
+            self.cur.execute("SELECT DISTINCT city FROM businessTable WHERE state=%s ORDER BY city;", (selected_state,))   # Fetch cities for the selected state
+            cities = self.cur.fetchall()
+            for city in cities:
+                self.ui.City.addItem(city[0])  
+        except psycopg2.Error as e:
+            print(f'Failed to fetch cities. Error: {e}') 
+
+    # function (m2LoadZipcode) to load zipcodes from the selected city using the selectLocation table
+    def m2LoadZipcode(self):
+        self.connectToDB("milestone2db")
+        selected_city = self.ui.City.currentItem().text() # Get the selected city
+        self.ui.Zipcode.clear()  
+        try:
+            self.cur.execute("SELECT DISTINCT zipcode FROM businessTable WHERE city=%s ORDER BY zipcode;", (selected_city,))   # Fetch zipcodes for the selected city
+            zipcodes = self.cur.fetchall()
+            for zipcode in zipcodes:
+                self.ui.Zipcode.addItem(zipcode[0])  
+        except psycopg2.Error as e:
+            print(f'Failed to fetch zipcodes. Error: {e}')
+
+    def m2ZipcodeStatistics(self):
+        self.connectToDB("milestone2db")
+        selected_zipcode = self.ui.Zipcode.currentItem().text() # Get the selected zipcode
+        # BusinessesStatistic, PopulationStatistic, IncomeStatistic are QLabels. populate them using the ZipcodeStatistics table
+        try:
+            # fetch numbusinesses, totalpupulation, and avgincome from zipcodeStatistics table for the selected zipcode and populate the QLabels
+            self.cur.execute("SELECT numbusinesses, totalpopulation, avgincome FROM zipcodeStatistics WHERE zipcode=%s;", (selected_zipcode,))
+            statistics = self.cur.fetchone()
+            self.ui.BusinessesStatistic.setText(str(statistics[0]))
+            self.ui.PopulationStatistic.setText(str(statistics[1]))
+            self.ui.IncomeStatistic.setText(str(statistics[2]))
+
+            # fetch unique categories from businessTable for the selected zipcode and populate the TopCategories QTableWidget
+            self.cur.execute("SELECT DISTINCT category FROM businessTable WHERE zipcode=%s;", (selected_zipcode,))
+            categories = self.cur.fetchall()
+            self.ui.TopCategories.clearContents()
+            self.ui.TopCategories.setColumnCount(1)
+            self.ui.TopCategories.setHorizontalHeaderLabels(['Category'])
+            self.ui.TopCategories.setRowCount(len(categories))
+            for row, (category,) in enumerate(categories):
+                self.ui.TopCategories.setItem(row, 0, QTableWidgetItem(category))
+
+
+        except psycopg2.Error as e:
+            print(f'Failed to fetch statistics for zipcode {selected_zipcode}. Error: {e}')
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
