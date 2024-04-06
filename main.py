@@ -142,24 +142,37 @@ class myApp(QMainWindow):  # Class for the main window
             self.ui.PopulationStatistic.setText(str(population))
             self.ui.IncomeStatistic.setText(str(mean_income))
 
-            # Fetch unique categories from the Categories table through the Has relationship for the selected zipcode
+            # using the HAS table, get the categories of the businesses in the selected zipcode and populate TopCategories table
             self.cur.execute("""
-                SELECT DISTINCT C.name
-                FROM Categories C
-                JOIN Has H ON C.name = H.category_id
-                JOIN Business B ON H.business_id = B.business_id
-                WHERE B.zipcode = %s;
+                SELECT c.name AS category, COUNT(*)
+                FROM Business AS b
+                JOIN Has AS h ON b.business_id = h.business_id
+                JOIN Categories AS c ON h.category_id = c.name
+                WHERE b.zipcode = %s
+                GROUP BY c.name
+                ORDER BY COUNT(*) DESC
             """, (selected_zipcode,))
-            categories = self.cur.fetchall()
-            self.ui.TopCategories.clearContents()
-            self.ui.TopCategories.setColumnCount(1)
-            self.ui.TopCategories.setHorizontalHeaderLabels(['Category'])
-            self.ui.TopCategories.setRowCount(len(categories))
-            for row, (category,) in enumerate(categories):
-                self.ui.TopCategories.setItem(row, 0, QTableWidgetItem(category))
+            top_categories = self.cur.fetchall()
+            self.ui.TopCategories.clear()
+            self.ui.TopCategories.setColumnCount(2)
+            self.ui.TopCategories.setHorizontalHeaderLabels(['Count', 'Category'])
+            self.ui.TopCategories.setRowCount(len(top_categories))
+            self.ui.TopCategories.verticalHeader().setVisible(False)
+            for row, (category, count) in enumerate(top_categories):
+                self.ui.TopCategories.setItem(row, 1, QTableWidgetItem(category))
+                self.ui.TopCategories.setItem(row, 0, QTableWidgetItem(str(count)))
+            #set column 1 with to fill the rest of the table
+            header = self.ui.TopCategories.horizontalHeader()
+            header.setSectionResizeMode(1, QHeaderView.ResizeMode.Stretch)
+
+
 
         except psycopg2.Error as e:
-            print(f'Failed to fetch statistics for zipcode {selected_zipcode}. Error: {e}')
+            print(f'Failed to fetch statistics. Error: {e}')
+
+        self.cur.close()
+        self.conn.close()
+
 
 
 
