@@ -29,6 +29,7 @@ class myApp(QMainWindow):  # Class for the main window
         self.ui.Zipcode.itemClicked.connect(self.m2ZipcodeStatistics)
         self.ui.Search.clicked.connect(self.m2Filter)
         self.ui.SelectCategory.itemClicked.connect(self.m2Businesses)
+        self.ui.SelectCategory.itemClicked.connect(self.fetchBusinessesWithScores)
 
     def connectToDB(self, dbName): # dbName is the name of the database to connect to
         try:
@@ -235,6 +236,35 @@ class myApp(QMainWindow):  # Class for the main window
         
         self.cur.close()
         self.conn.close()
+    def fetchBusinessesWithScores(self):
+        self.connectToDB("milestone2db")
+        selected_zipcode = self.ui.Zipcode.currentItem().text()
+        selected_category = self.ui.SelectCategory.currentItem().text()
+        try:
+            # Query to calculate scores based on provided weights and fetch business details
+            self.cur.execute("""
+                SELECT b.name, b.address, b.city, b.stars, b.review_count, b.numCheckins,
+                    (b.numCheckins) AS popularity_score, 
+                    ((b.numCheckins * 0.1) + (b.stars * 0.6) + (b.review_count * 0.3)) AS success_score
+                FROM Business AS b
+                JOIN Has AS h ON b.business_id = h.business_id
+                JOIN Categories AS c ON h.category_id = c.name
+                WHERE b.zipcode = %s AND c.name = %s
+                ORDER BY success_score DESC, popularity_score DESC;
+            """, (selected_zipcode, selected_category))
+            businesses = self.cur.fetchall()
+            
+            # Print results to the console
+            # print(f"Businesses in zipcode {selected_zipcode} and category '{selected_category}':")
+            # for business in businesses:
+            #     print(f"Name: {business[0]}, Address: {business[1]}, City: {business[2]}, Stars: {business[3]}, Review Count: {business[4]}, Total Checkins: {business[5]}, Popularity Score: {business[6]}, Success Score: {business[7]}")
+
+        except psycopg2.Error as e:
+            print(f'Failed to fetch businesses with scores. Error: {e}')
+        finally:
+            self.cur.close()
+            self.conn.close()
+
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
