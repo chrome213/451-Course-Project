@@ -201,7 +201,7 @@ def insert2CheckinTable():
     f.close()
 
 
-def UpdateCheckins():
+def updateCheckins():
     try:
         conn = psycopg2.connect("dbname='milestone2db' user='postgres' host='localhost' password='0213'")
     except:
@@ -240,11 +240,11 @@ def updateReviewRating():
     conn.close()
 
 #insert2ZipcodeDataTable()
-insert2BusinessTable()
+#insert2BusinessTable()
 #insert2ReviewTable()
 #insert2CategoriesTable()
 #insert2HasTable()
 #insert2CheckinTable()
-UpdateCheckins()
-updateReviewCount()
-updateReviewRating()
+#updateCheckins()
+#updateReviewCount()
+#updateReviewRating()
