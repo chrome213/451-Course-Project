@@ -1,0 +1,41 @@
+--Table size of the Business Table
+SELECT COUNT(*) FROM Business;
+ count
+-------
+ 11481
+(1 row)
+
+--Table size of zipcode Table
+SELECT COUNT(*) FROM zipcode;
+ count
+-------
+ 32630
+(1 row)
+
+--Table size of the categories Table
+SELECT COUNT(*) FROM categories;
+ count
+-------
+   226
+(1 row)
+
+--Table size of the has Table
+SELECT COUNT(*) FROM has;
+ count
+-------
+ 33619
+(1 row)
+
+--Table size of the check_ins Table
+SELECT COUNT(*) FROM check_ins;
+ count
+-------
+ 67407
+(1 row)
+
+--Table size of the review Table
+SELECT COUNT(*) FROM review;
+ count
+--------
+ 416479
+(1 row) 

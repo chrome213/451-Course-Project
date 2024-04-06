@@ -236,7 +236,7 @@ def insert2CheckinTable():
     print(count_line)
     f.close()
 
-# Function (UpdateCheckins) to update the numCheckins column in the Business table using the Check_ins table
+
 def UpdateCheckins():
     try:
         conn = psycopg2.connect("dbname='milestone2db' user='postgres' host='localhost' password='0213'")
@@ -249,7 +249,7 @@ def UpdateCheckins():
     cur.close()
     conn.close()
 
-# Function (update reviewCount) to update the review_count column in the Business table using the Review table
+
 def updateReviewCount():
     try:
         conn = psycopg2.connect("dbname='milestone2db' user='postgres' host='localhost' password='0213'")
@@ -262,7 +262,7 @@ def updateReviewCount():
     cur.close()
     conn.close()
 
-# Function (update reviewRating) to update the reviewRating column in the Business table using the Review table to calculate average stars for each business
+
 def updateReviewRating():
     try:
         conn = psycopg2.connect("dbname='milestone2db' user='postgres' host='localhost' password='0213'")
