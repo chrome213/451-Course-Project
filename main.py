@@ -39,7 +39,7 @@ class myApp(QMainWindow):  # Class for the main window
             print(f'Unable to connect to the {dbName} database! Error: {e}')
             sys.exit(1)
 
-    def loadStates(self): # Function to load states
+    def loadStates(self): 
         self.connectToDB("milestone1db")
         try:
             self.cur.execute("SELECT DISTINCT state FROM business ORDER BY state;")
@@ -49,7 +49,7 @@ class myApp(QMainWindow):  # Class for the main window
         except psycopg2.Error as e:
             print(f'Failed to fetch states. Error: {e}')
 
-    def loadCities(self): # Function to load cities for the selected state
+    def loadCities(self): 
         self.connectToDB("milestone1db")
         selected_state = self.ui.StateBox.currentText()   
         self.ui.CityList.clear()  
@@ -61,7 +61,7 @@ class myApp(QMainWindow):  # Class for the main window
         except psycopg2.Error as e:
             print(f'Failed to fetch cities. Error: {e}')
 
-    def loadBusinessesForCity(self): # Function to load businesses for the selected city
+    def loadBusinessesForCity(self): 
         self.connectToDB("milestone1db")
         selected_city = self.ui.CityList.currentItem().text() # Get the selected city
         self.ui.BusinessTable.clearContents()  
@@ -82,7 +82,7 @@ class myApp(QMainWindow):  # Class for the main window
         except psycopg2.Error as e:
             print(f'Failed to fetch businesses for city {selected_city}. Error: {e}')    
 
-    def m2loadStates(self): # Function to load states
+    def m2loadStates(self): 
         self.connectToDB("milestone2db")
         try:
             self.cur.execute("SELECT DISTINCT state FROM business ORDER BY state;")
@@ -92,7 +92,6 @@ class myApp(QMainWindow):  # Class for the main window
         except psycopg2.Error as e:
             print(f'Failed to fetch states. Error: {e}')
    
-    # function (m2LoadCities) to load cities from the selected state using the selectLocation table
     def m2LoadCities(self):
         self.connectToDB("milestone2db")
         selected_state = self.ui.State.currentText()   
@@ -105,7 +104,6 @@ class myApp(QMainWindow):  # Class for the main window
         except psycopg2.Error as e:
             print(f'Failed to fetch cities. Error: {e}') 
 
-    # function (m2LoadZipcode) to load zipcodes from the selected city using the selectLocation table
     def m2LoadZipcode(self):
         self.connectToDB("milestone2db")
         selected_city = self.ui.City.currentItem().text() # Get the selected city
@@ -173,7 +171,6 @@ class myApp(QMainWindow):  # Class for the main window
         self.cur.close()
         self.conn.close()
 
-# function (m2Filter) that populates the SelectCategory QListWidget with unique categories from the businesses in the selected zipcode using the Has table
     def m2Filter(self):
         self.connectToDB("milestone2db")
         selected_zipcode = self.ui.Zipcode.currentItem().text()
@@ -195,7 +192,6 @@ class myApp(QMainWindow):  # Class for the main window
 
         self.cur.close()
 
-# function (m2Businesses) that populates the Businesses QTablewidget with businesses in the selected zipcode and selected category with (business name, address, city, stars, review count, average rating, number of checkins) using the Business table
     def m2Businesses(self):
         self.connectToDB("milestone2db")
         selected_zipcode = self.ui.Zipcode.currentItem().text()
@@ -223,7 +219,7 @@ class myApp(QMainWindow):  # Class for the main window
                 self.ui.Businesses.setItem(row, 2, QTableWidgetItem(city))
                 self.ui.Businesses.setItem(row, 3, QTableWidgetItem(str(stars)))
                 self.ui.Businesses.setItem(row, 4, QTableWidgetItem(str(review_count)))
-                self.ui.Businesses.setItem(row, 5, QTableWidgetItem(str(reviewRating)))
+                self.ui.Businesses.setItem(row, 5, QTableWidgetItem(str(round(reviewRating, 1))))
                 self.ui.Businesses.setItem(row, 6, QTableWidgetItem(str(numCheckins)))
         except psycopg2.Error as e:
             print(f'Failed to fetch businesses. Error: {e}')
@@ -239,10 +235,6 @@ class myApp(QMainWindow):  # Class for the main window
         
         self.cur.close()
         self.conn.close()
-
-
-
-
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

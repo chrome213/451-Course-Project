@@ -15,12 +15,10 @@ def list2Str(lst):
     return ','.join(str(e) for e in lst)
 
 def insert2BusinessTable():
-    #reading the JSON file
     with open('./yelp_business.JSON','r') as f:
         line = f.readline()
         count_line = 0
 
-        #connect to yelpdb database on postgres server using psycopg2
         try:
             conn = psycopg2.connect("dbname='milestone2db' user='postgres' host='localhost' password='0213'")
         except:
@@ -53,7 +51,6 @@ def insert2BusinessTable():
     print(count_line)
     f.close()
 
-# create a new table called zipcodeData and run the sql statement in zipData.sql.
 def insert2ZipcodeDataTable():
     try:
         conn = psycopg2.connect("dbname='milestone2db' user='postgres' host='localhost' password='0213'")
@@ -62,7 +59,6 @@ def insert2ZipcodeDataTable():
         return
     
     cur = conn.cursor()
-    # drop the table if it already exists
     cur.execute("DROP TABLE IF EXISTS zipcode CASCADE")
     cur.execute("""
         CREATE TABLE zipcode (zipcode_id INT PRIMARY KEY,medianIncome INT NOT NULL,meanIncome INT NOT NULL,population INT NOT NULL);
@@ -76,14 +72,6 @@ def insert2ZipcodeDataTable():
     cur.close()
     conn.close()
 
-# funciton (insert2ReviewTable) to insert data into the review table
-# CREATE TABLE Review (
-#     review_id INT PRIMARY KEY,
-#     stars DECIMAL,
-#     business_id INT,
-#     FOREIGN KEY (business_id) REFERENCES Business(business_id)
-# );
-# make the table and populate it with the data from the yelp_review.JSON file
 def insert2ReviewTable():
     with open('./yelp_review.JSON','r') as f:
         line = f.readline()
@@ -119,12 +107,6 @@ def insert2ReviewTable():
     print(count_line)
     f.close()
 
-# funciton (insert2categoriesTable) to insert data into the categories table
-# example of categories dictionary entry: "categories": ["Chicken Wings", "Sandwiches", "Restaurants", "Pizza"]
-# CREATE TABLE Categories (
-#     name VARCHAR(255) PRIMARY KEY
-# );
-# make the table and populate it with unique categories from the yelp_business.JSON file
 def insert2CategoriesTable():
     with open('./yelp_business.JSON','r') as f:
         line = f.readline()
@@ -156,15 +138,6 @@ def insert2CategoriesTable():
     print(count_line)
     f.close()
 
-# function (insert2HasTable) to insert data into the has table
-# CREATE TABLE Has (
-#     business_id VARCHAR(255),
-#     category_id VARCHAR(255),
-#     PRIMARY KEY (business_id, name),
-#     FOREIGN KEY (business_id) REFERENCES Business(business_id),
-#     FOREIGN KEY (name) REFERENCES Categories(name)
-# );
-# make the table and populate it using the business and categories tables
 def insert2HasTable():
     with open('./yelp_business.JSON','r') as f:
         line = f.readline()
@@ -196,15 +169,6 @@ def insert2HasTable():
     print(count_line)
     f.close()
 
-# Function (insert2CheckinTable) to insert data into the checkin table
-# CREATE TABLE Check_ins (
-#     business_id VARCHAR(255),
-#     day VARCHAR(10),
-#     count INT,
-#     PRIMARY KEY (business_id, day),
-#     FOREIGN KEY (business_id) REFERENCES Business(business_id)
-# );
-# example data in the json: {"time": {"Friday": {"20:00": 2, "19:00": 1, "22:00": 10, "21:00": 5, "23:00": 14, "0:00": 2, "18:00": 2}, "Thursday": {"23:00": 1, "0:00": 1, "19:00": 1, "18:00": 1, "16:00": 2, "22:00": 2}, "Wednesday": {"17:00": 2, "23:00": 3, "16:00": 1, "22:00": 1, "19:00": 1, "21:00": 1}, "Sunday": {"16:00": 2, "17:00": 2, "19:00": 1, "22:00": 4, "21:00": 4, "0:00": 3, "1:00": 2}, "Saturday": {"21:00": 4, "20:00": 3, "23:00": 10, "22:00": 7, "18:00": 1, "15:00": 2, "16:00": 1, "17:00": 1, "0:00": 8, "1:00": 1}, "Tuesday": {"19:00": 1, "17:00": 1, "1:00": 2, "21:00": 1, "23:00": 3}, "Monday": {"18:00": 2, "23:00": 1, "22:00": 2}}, "business_id": "dwQEZBFen2GdihLLfWeexA"}
 def insert2CheckinTable():
     with open('./yelp_checkin.JSON','r') as f:
         line = f.readline()
