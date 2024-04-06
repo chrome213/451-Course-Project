@@ -14,6 +14,7 @@ def list2Str(lst):
     """Converts a list to a string format to store in PostgreSQL."""
     return ','.join(str(e) for e in lst)
 
+# creates and populates the business table
 def insert2BusinessTable():
     with open('./yelp_business.JSON','r') as f:
         line = f.readline()
@@ -51,6 +52,7 @@ def insert2BusinessTable():
     print(count_line)
     f.close()
 
+# creates and populates the zipcode table
 def insert2ZipcodeDataTable():
     try:
         conn = psycopg2.connect("dbname='milestone2db' user='postgres' host='localhost' password='0213'")
@@ -72,6 +74,7 @@ def insert2ZipcodeDataTable():
     cur.close()
     conn.close()
 
+# creates and populates the review table
 def insert2ReviewTable():
     with open('./yelp_review.JSON','r') as f:
         line = f.readline()
@@ -107,6 +110,7 @@ def insert2ReviewTable():
     print(count_line)
     f.close()
 
+# creates and populates the categories table
 def insert2CategoriesTable():
     with open('./yelp_business.JSON','r') as f:
         line = f.readline()
@@ -138,6 +142,7 @@ def insert2CategoriesTable():
     print(count_line)
     f.close()
 
+# creates and populates the has table
 def insert2HasTable():
     with open('./yelp_business.JSON','r') as f:
         line = f.readline()
@@ -169,6 +174,7 @@ def insert2HasTable():
     print(count_line)
     f.close()
 
+# creates and populates the checkin table
 def insert2CheckinTable():
     with open('./yelp_checkin.JSON','r') as f:
         line = f.readline()
@@ -200,7 +206,7 @@ def insert2CheckinTable():
     print(count_line)
     f.close()
 
-
+# updates the checkins column in the business table
 def updateCheckins():
     try:
         conn = psycopg2.connect("dbname='milestone2db' user='postgres' host='localhost' password='0213'")
@@ -213,7 +219,7 @@ def updateCheckins():
     cur.close()
     conn.close()
 
-
+# updates the review count column in the business table
 def updateReviewCount():
     try:
         conn = psycopg2.connect("dbname='milestone2db' user='postgres' host='localhost' password='0213'")
@@ -226,7 +232,7 @@ def updateReviewCount():
     cur.close()
     conn.close()
 
-
+# updates the review rating column in the business table
 def updateReviewRating():
     try:
         conn = psycopg2.connect("dbname='milestone2db' user='postgres' host='localhost' password='0213'")

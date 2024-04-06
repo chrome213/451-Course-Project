@@ -17,6 +17,7 @@ class myApp(QMainWindow):  # Class for the main window
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
 
+        # on GUI event change, trigger one of our functions
         # MILSTONE 1
         self.loadStates() # Load states
         self.ui.StateBox.currentIndexChanged.connect(self.loadCities) # Load cities for the selected state
@@ -31,7 +32,8 @@ class myApp(QMainWindow):  # Class for the main window
         self.ui.SelectCategory.itemClicked.connect(self.m2Businesses)
         self.ui.SelectCategory.itemClicked.connect(self.fetchBusinessesWithScores)
 
-    def connectToDB(self, dbName): # dbName is the name of the database to connect to
+    # Connects to the database passed in, we have two databases, one for milestone 1 and one for milestone 2
+    def connectToDB(self, dbName):
         try:
             self.conn = psycopg2.connect(f"dbname='{dbName}' user='postgres' host='localhost' password='0213'")
             self.conn.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
@@ -40,6 +42,7 @@ class myApp(QMainWindow):  # Class for the main window
             print(f'Unable to connect to the {dbName} database! Error: {e}')
             sys.exit(1)
 
+    # Milestone 1 load states function that populates the milestone state combobox
     def loadStates(self): 
         self.connectToDB("milestone1db")
         try:
@@ -50,6 +53,7 @@ class myApp(QMainWindow):  # Class for the main window
         except psycopg2.Error as e:
             print(f'Failed to fetch states. Error: {e}')
 
+    # Milestone 1 load states function that populates the milestone state combobox
     def loadCities(self): 
         self.connectToDB("milestone1db")
         selected_state = self.ui.StateBox.currentText()   
@@ -62,6 +66,7 @@ class myApp(QMainWindow):  # Class for the main window
         except psycopg2.Error as e:
             print(f'Failed to fetch cities. Error: {e}')
 
+    # Milestone 1 load businesses function that populates the milestone business table
     def loadBusinessesForCity(self): 
         self.connectToDB("milestone1db")
         selected_city = self.ui.CityList.currentItem().text() # Get the selected city
@@ -83,6 +88,7 @@ class myApp(QMainWindow):  # Class for the main window
         except psycopg2.Error as e:
             print(f'Failed to fetch businesses for city {selected_city}. Error: {e}')    
 
+    # Milestone 2 load states function that populates the milestone state combobox
     def m2loadStates(self): 
         self.connectToDB("milestone2db")
         try:
@@ -93,6 +99,7 @@ class myApp(QMainWindow):  # Class for the main window
         except psycopg2.Error as e:
             print(f'Failed to fetch states. Error: {e}')
    
+   # Milestone 2 load cities function that populates the milestone city combobox
     def m2LoadCities(self):
         self.connectToDB("milestone2db")
         selected_state = self.ui.State.currentText()   
@@ -105,6 +112,7 @@ class myApp(QMainWindow):  # Class for the main window
         except psycopg2.Error as e:
             print(f'Failed to fetch cities. Error: {e}') 
 
+    # Milestone 2 load zipcodes function that populates the milestone zipcode combobox
     def m2LoadZipcode(self):
         self.connectToDB("milestone2db")
         selected_city = self.ui.City.currentItem().text() # Get the selected city
@@ -117,6 +125,7 @@ class myApp(QMainWindow):  # Class for the main window
         except psycopg2.Error as e:
             print(f'Failed to fetch zipcodes. Error: {e}')
 
+    # Milestone 2 load statistics function that populates the milestone statistics Label and Top Categories
     def m2ZipcodeStatistics(self):
         self.connectToDB("milestone2db")
         selected_zipcode = self.ui.Zipcode.currentItem().text()  # Get the selected zipcode
@@ -143,7 +152,6 @@ class myApp(QMainWindow):  # Class for the main window
             self.ui.PopulationStatistic.setText(str(population))
             self.ui.IncomeStatistic.setText(str(mean_income))
 
-            # using the HAS table, get the categories of the businesses in the selected zipcode and populate TopCategories table
             self.cur.execute("""
                 SELECT c.name AS category, COUNT(*)
                 FROM Business AS b
@@ -172,6 +180,7 @@ class myApp(QMainWindow):  # Class for the main window
         self.cur.close()
         self.conn.close()
 
+    # Milestone 2 filter function that populates the milestone category dearch combobox
     def m2Filter(self):
         self.connectToDB("milestone2db")
         selected_zipcode = self.ui.Zipcode.currentItem().text()
@@ -193,6 +202,7 @@ class myApp(QMainWindow):  # Class for the main window
 
         self.cur.close()
 
+    # Milestone 2 businesses function that populates the milestone business table
     def m2Businesses(self):
         self.connectToDB("milestone2db")
         selected_zipcode = self.ui.Zipcode.currentItem().text()
@@ -236,6 +246,8 @@ class myApp(QMainWindow):  # Class for the main window
         
         self.cur.close()
         self.conn.close()
+    
+    # Milestone 2 fetch businesses with scores function that populates the milestone business table
     def fetchBusinessesWithScores(self):
         self.connectToDB("milestone2db")
         selected_zipcode = self.ui.Zipcode.currentItem().text()
