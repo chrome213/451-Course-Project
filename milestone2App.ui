@@ -192,6 +192,14 @@ font: 10pt &quot;Lucida Sans&quot;;</string>
         <height>201</height>
        </rect>
       </property>
+      <property name="font">
+       <font>
+        <family>Lucida Sans</family>
+        <pointsize>12</pointsize>
+        <italic>false</italic>
+        <bold>false</bold>
+       </font>
+      </property>
       <property name="autoFillBackground">
        <bool>true</bool>
       </property>
@@ -307,16 +315,25 @@ font: 10pt &quot;Lucida Sans&quot;;</string>
         <height>41</height>
        </rect>
       </property>
+      <property name="minimumSize">
+       <size>
+        <width>41</width>
+        <height>41</height>
+       </size>
+      </property>
       <property name="font">
        <font>
         <family>Lucida Sans</family>
-        <pointsize>12</pointsize>
+        <pointsize>7</pointsize>
         <italic>false</italic>
         <bold>false</bold>
        </font>
       </property>
+      <property name="styleSheet">
+       <string notr="true">font: 7pt &quot;Lucida Sans&quot;;</string>
+      </property>
       <property name="text">
-       <string/>
+       <string>Clear</string>
       </property>
      </widget>
      <widget class="QLabel" name="label_3">
@@ -352,13 +369,16 @@ font: 10pt &quot;Lucida Sans&quot;;</string>
       <property name="font">
        <font>
         <family>Lucida Sans</family>
-        <pointsize>12</pointsize>
+        <pointsize>7</pointsize>
         <italic>false</italic>
         <bold>false</bold>
        </font>
       </property>
+      <property name="styleSheet">
+       <string notr="true">font: 7pt &quot;Lucida Sans&quot;;</string>
+      </property>
       <property name="text">
-       <string/>
+       <string>Search</string>
       </property>
      </widget>
      <widget class="QTableWidget" name="Businesses">
@@ -369,6 +389,14 @@ font: 10pt &quot;Lucida Sans&quot;;</string>
         <width>671</width>
         <height>141</height>
        </rect>
+      </property>
+      <property name="font">
+       <font>
+        <family>Lucida Sans</family>
+        <pointsize>12</pointsize>
+        <italic>false</italic>
+        <bold>false</bold>
+       </font>
       </property>
      </widget>
      <widget class="QLabel" name="label_pic">
@@ -467,13 +495,16 @@ font: 10pt &quot;Lucida Sans&quot;;</string>
       <property name="font">
        <font>
         <family>Lucida Sans</family>
-        <pointsize>12</pointsize>
+        <pointsize>7</pointsize>
         <italic>false</italic>
         <bold>false</bold>
        </font>
       </property>
+      <property name="styleSheet">
+       <string notr="true">font: 7pt &quot;Lucida Sans&quot;;</string>
+      </property>
       <property name="text">
-       <string/>
+       <string>Refresh</string>
       </property>
      </widget>
      <widget class="QLabel" name="label_4">
