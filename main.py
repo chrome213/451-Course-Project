@@ -29,6 +29,7 @@ class myApp(QMainWindow):  # Class for the main window
         self.ui.City.itemClicked.connect(self.m2LoadZipcode)
         self.ui.Zipcode.itemClicked.connect(self.m2ZipcodeStatistics)
         self.ui.Zipcode.itemClicked.connect(self.m2Filter)
+        self.ui.Zipcode.itemClicked.connect(self.m2ZipcodeBusiness)
         self.ui.Search.clicked.connect(self.m2Businesses)
         self.ui.Clear.clicked.connect(self.clearBusinessTable)
         self.ui.Refresh.clicked.connect(self.SuccessfulBusinesses)
@@ -257,6 +258,51 @@ class myApp(QMainWindow):  # Class for the main window
 
         self.cur.close()
 
+    # milestone 2 businesses function that populates the milestone business table without a category selected
+    def m2ZipcodeBusiness(self):
+        # make sure that the user has selected a zipcode
+        if self.ui.Zipcode.currentItem() is None:
+            return
+        self.connectToDB("milestone2db")
+        selected_zipcode = self.ui.Zipcode.currentItem().text()
+        self.ui.Businesses.clearContents()
+        self.ui.Businesses.setColumnCount(7)
+        self.ui.Businesses.setHorizontalHeaderLabels(['Name', 'Address', 'City', 'Stars', 'RevCount', 'reviewRating', 'numCheckins'])
+        header = self.ui.Businesses.horizontalHeader()
+        header.setSectionResizeMode(0, QHeaderView.ResizeMode.Stretch)
+
+        try:
+            self.cur.execute("""
+                SELECT b.name, b.address, b.city, b.stars, b.review_count, b.reviewRating, b.numCheckins
+                FROM Business AS b
+                WHERE b.zipcode = %s
+                ORDER BY b.name;
+            """, (selected_zipcode,))
+            businesses = self.cur.fetchall()
+            self.ui.Businesses.setRowCount(len(businesses))
+            for row, (name, address, city, stars, review_count, reviewRating, numCheckins) in enumerate(businesses):
+                self.ui.Businesses.setItem(row, 0, QTableWidgetItem(name))
+                self.ui.Businesses.setItem(row, 1, QTableWidgetItem(address))
+                self.ui.Businesses.setItem(row, 2, QTableWidgetItem(city))
+                self.ui.Businesses.setItem(row, 3, QTableWidgetItem(str(stars)))
+                self.ui.Businesses.setItem(row, 4, QTableWidgetItem(str(review_count)))
+                self.ui.Businesses.setItem(row, 5, QTableWidgetItem(str(round(reviewRating, 1))))
+                self.ui.Businesses.setItem(row, 6, QTableWidgetItem(str(numCheckins)))
+        except psycopg2.Error as e:
+            print(f'Failed to fetch businesses. Error: {e}')
+        # make the last 4 columns smaller and  increase the first column size
+        header = self.ui.Businesses.horizontalHeader()
+        header.setSectionResizeMode(0, QHeaderView.ResizeMode.ResizeToContents)
+        header.setSectionResizeMode(1, QHeaderView.ResizeMode.ResizeToContents)
+        header.setSectionResizeMode(2, QHeaderView.ResizeMode.ResizeToContents)
+        header.setSectionResizeMode(3, QHeaderView.ResizeMode.ResizeToContents)
+        header.setSectionResizeMode(4, QHeaderView.ResizeMode.ResizeToContents)
+        header.setSectionResizeMode(5, QHeaderView.ResizeMode.ResizeToContents)
+        header.setSectionResizeMode(6, QHeaderView.ResizeMode.ResizeToContents)
+        
+        self.cur.close()
+        self.conn.close()
+
     # Milestone 2 businesses function that populates the milestone business table
     def m2Businesses(self):
         # make sure that the user has selected a zipcode and category
@@ -382,7 +428,6 @@ class myApp(QMainWindow):  # Class for the main window
            
         except psycopg2.Error as e:
             print(f'Failed to fetch businesses with scores. Error: {e}')
-        # make the first collumn fit the size of the rest of the table
         header.setSectionResizeMode(0, QHeaderView.ResizeMode.Stretch)
         header.setSectionResizeMode(1, QHeaderView.ResizeMode.ResizeToContents)
         self.cur.close()
